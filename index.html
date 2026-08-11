@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Romana — Словник</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --surface-hover: #f5f5f4;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --text-secondary: #78716c;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-light: #dbeafe;
+    --danger: #dc2626;
+    --tag-word: #dbeafe;
+    --tag-phrase: #fef3c7;
+    --tag-expression: #d1fae5;
+    --tag-word-text: #1e40af;
+    --tag-phrase-text: #92400e;
+    --tag-expression-text: #065f46;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh;
+  }
+  .app { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  .header-actions { display: flex; gap: 8px; }
+  .btn-icon {
+    width: 36px; height: 36px; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); transition: all 0.15s;
+  }
+  .btn-icon:hover { background: var(--surface-hover); color: var(--text); }
+
+  .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; margin-bottom: 20px; }
+  .tab { flex: 1; padding: 10px 16px; border: none; background: transparent; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--accent); color: white; box-shadow: var(--shadow); }
+
+  .search-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .search-bar input {
+    flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; background: var(--surface); color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+  .search-bar input:focus { border-color: var(--accent); }
+  .btn-primary { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .filters { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .filter-btn { padding: 6px 14px; border: 1px solid var(--border); background: var(--surface); border-radius: 20px; font-size: 13px; cursor: pointer; color: #4a4543; transition: all 0.15s; font-weight: 700; }
+  .filter-btn:hover { border-color: #c4899a; color: #9e4a63; }
+  .filter-btn.active { background: #d4a0b0; color: white; border-color: #d4a0b0; }
+
+  .category-filters { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+  .cat-btn { padding: 4px 10px; border: 1px solid var(--border); background: var(--surface); border-radius: 14px; font-size: 12px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
+  .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+  .stats { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+
+  .entries { display: flex; flex-direction: column; gap: 16px; }
+  .entry-group-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 4px; }
+  .entry-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .entry-card { background: var(--surface); padding: 6px 10px; position: relative; display: flex; align-items: baseline; gap: 6px; transition: background 0.1s; }
+  .entry-card:hover { background: var(--surface-hover); }
+  .entry-word { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .entry-sep { color: var(--border); font-size: 12px; }
+  .entry-translation { font-size: 12px; color: var(--text-secondary); }
+  .entry-actions { display: none; position: absolute; right: 2px; top: 50%; transform: translateY(-50%); gap: 2px; background: var(--surface-hover); border-radius: 4px; padding: 1px; }
+  .entry-card:hover .entry-actions { display: flex; }
+  .entry-actions button { padding: 1px 6px; font-size: 11px; border: 1px solid var(--border); background: var(--surface); border-radius: 3px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; line-height: 1.4; }
+  .entry-actions button:hover { background: var(--surface-hover); color: var(--text); }
+  .entry-actions button.delete:hover { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+  @media (max-width: 600px) { .entry-group { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px) { .entry-group { grid-template-columns: 1fr; } }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; padding: 28px; width: 100%; max-width: 500px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text-secondary); }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; background: var(--bg); color: var(--text); outline: none; font-family: inherit; transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+  .btn-secondary { padding: 10px 20px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; transition: background 0.15s; }
+  .btn-secondary:hover { background: var(--surface-hover); }
+
+  .drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px 20px; text-align: center; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; margin-bottom: 16px; background: var(--surface); }
+  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .drop-zone p { font-size: 14px; margin-top: 8px; }
+  .drop-zone .icon { font-size: 32px; opacity: 0.5; }
+  .grammar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .grammar-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: box-shadow 0.15s; }
+  .grammar-card:hover { box-shadow: var(--shadow); }
+  .grammar-card img { width: 100%; display: block; cursor: pointer; transition: opacity 0.15s; }
+  .grammar-card img:hover { opacity: 0.9; }
+  .grammar-card-content { padding: 16px; font-size: 13px; line-height: 1.6; cursor: pointer; transition: background 0.15s; }
+  .grammar-card-content:hover { background: var(--surface-hover); }
+  .grammar-card-content table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  .grammar-card-content th, .grammar-card-content td { padding: 4px 8px; border: 1px solid var(--border); text-align: left; font-size: 13px; }
+  .grammar-card-content th { background: var(--accent-light); font-weight: 600; }
+  .grammar-card-content .rule { font-size: 15px; font-weight: 700; color: var(--accent); margin: 4px 0; }
+  .grammar-card-content .example { color: var(--text-secondary); font-style: italic; }
+
+  .lightbox-html { max-width: 90vw; max-height: 90vh; background: var(--surface); border-radius: 12px; padding: 28px; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-size: 15px; line-height: 1.7; }
+  .lightbox-html table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+  .lightbox-html th, .lightbox-html td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  .lightbox-html th { background: var(--accent-light); font-weight: 600; }
+  .lightbox-html .rule { font-size: 20px; font-weight: 700; color: var(--accent); margin: 8px 0; }
+  .lightbox-html .example { color: var(--text-secondary); font-style: italic; }
+  .grammar-card-info { padding: 12px; }
+  .grammar-card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .grammar-card-note { font-size: 13px; color: var(--text-secondary); }
+  .grammar-card-actions { display: flex; gap: 4px; padding: 0 12px 12px; }
+  .grammar-card-actions button { padding: 4px 10px; font-size: 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 6px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
+  .grammar-card-actions button:hover { background: var(--surface-hover); color: var(--text); }
+  .grammar-card-actions button.delete:hover { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+  .grammar-date { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; cursor: pointer; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+  .section { display: none; }
+  .section.active { display: block; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+  .empty-state .icon { font-size: 40px; opacity: 0.4; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+  .hidden-input { display: none; }
+
+  @media (max-width: 600px) {
+    .app { padding: 16px 12px; }
+    .grammar-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Romana</h1>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="exportData()" title="Експорт даних">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <button class="btn-icon" onclick="document.getElementById('importInput').click()" title="Імпорт даних">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+      <input type="file" id="importInput" class="hidden-input" accept=".json" onchange="importData(event)">
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dictionary')">Словник</button>
+    <button class="tab" onclick="switchTab('grammar')">Граматика</button>
+  </div>
+
+  <div id="dictionary-section" class="section active">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Шукати слово або переклад..." oninput="renderDictionary()">
+      <button class="btn-primary" onclick="openModal()">+ Додати</button>
+    </div>
+    <div class="filters" id="typeFilters">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Все</button>
+      <button class="filter-btn" data-filter="word" onclick="setFilter('word')">Слова</button>
+      <button class="filter-btn" data-filter="phrase" onclick="setFilter('phrase')">Фрази</button>
+      <button class="filter-btn" data-filter="expression" onclick="setFilter('expression')">Вирази</button>
+    </div>
+    <div class="category-filters" id="categoryFilters"></div>
+    <div class="stats" id="stats"></div>
+    <div class="entries" id="entries"></div>
+  </div>
+
+  <div id="grammar-section" class="section">
+    <div class="search-bar">
+      <input type="text" id="grammarSearch" placeholder="Шукати в нотатках..." oninput="renderGrammar()">
+      <button class="btn-primary" onclick="openGrammarModal()">+ Нотатка</button>
+    </div>
+    <div class="category-filters" id="grammarCategoryFilters"></div>
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">+</div>
+      <p>Перетягни скріншот сюди або натисни, щоб вибрати</p>
+    </div>
+    <input type="file" id="fileInput" class="hidden-input" accept="image/*" multiple onchange="handleFiles(event.target.files)">
+    <div class="grammar-grid" id="grammarGrid"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="entryModal">
+  <div class="modal">
+    <h2 id="modalTitle">Нове слово</h2>
+    <div class="form-group">
+      <label>Румунською</label>
+      <input type="text" id="formWord" placeholder="cuvânt" oninput="autoFillCategory()">
+    </div>
+    <div class="form-group">
+      <label>Переклад</label>
+      <input type="text" id="formTranslation" placeholder="слово">
+    </div>
+    <div class="form-group">
+      <label>Тип</label>
+      <select id="formType">
+        <option value="word">Слово</option>
+        <option value="phrase">Фраза</option>
+        <option value="expression">Вираз</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Категорія</label>
+      <input type="text" id="formCategory" list="categoryList" placeholder="Сім'я, Дієслова, Привітання...">
+      <datalist id="categoryList"></datalist>
+    </div>
+    <div class="form-group">
+      <label>Приклад (необов'язково)</label>
+      <textarea id="formExample" placeholder="Aceasta este o propoziție."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Скасувати</button>
+      <button class="btn-primary" onclick="saveEntry()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="grammarModal">
+  <div class="modal">
+    <h2 id="grammarModalTitle">Нотатка</h2>
+    <div class="form-group">
+      <label>Назва / тема</label>
+      <input type="text" id="grammarFormTitle" placeholder="Артиклі, Відмінювання...">
+    </div>
+    <div class="form-group">
+      <label>Категорія</label>
+      <input type="text" id="grammarFormCategory" list="grammarCatList" placeholder="Теперішній час, Минулий час...">
+      <datalist id="grammarCatList"></datalist>
+    </div>
+    <div class="form-group">
+      <label>Нотатки (необов'язково)</label>
+      <textarea id="grammarFormNote" placeholder="Додаткові пояснення..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeGrammarModal()">Скасувати</button>
+      <button class="btn-primary" onclick="saveGrammarNote()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" alt="">
+  <div id="lightboxHtml" class="lightbox-html" style="display:none" onclick="event.stopPropagation()"></div>
+</div>
+
+<script>
+const DB_NAME = 'romana_db';
+const DB_VERSION = 2;
+let db;
+let currentFilter = 'all';
+let currentCategory = 'all';
+let editingId = null;
+let editingGrammarId = null;
+let pendingImages = [];
+let currentGrammarCat = 'all';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('dictionary')) {
+        const store = db.createObjectStore('dictionary', { keyPath: 'id' });
+        store.createIndex('type', 'type');
+        store.createIndex('category', 'category');
+        store.createIndex('created', 'created');
+      } else {
+        const tx = e.target.transaction;
+        const store = tx.objectStore('dictionary');
+        if (!store.indexNames.contains('category')) {
+          store.createIndex('category', 'category');
+        }
+      }
+      if (!db.objectStoreNames.contains('grammar')) {
+        db.createObjectStore('grammar', { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function getAll(store) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function put(store, item) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(item);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function del(store, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'dictionary' && i === 0) || (tab === 'grammar' && i === 1));
+  });
+  document.getElementById('dictionary-section').classList.toggle('active', tab === 'dictionary');
+  document.getElementById('grammar-section').classList.toggle('active', tab === 'grammar');
+}
+
+function setFilter(filter) {
+  currentFilter = filter;
+  currentCategory = 'all';
+  document.querySelectorAll('#typeFilters .filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+  });
+  renderDictionary();
+}
+
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  renderDictionaryList();
+}
+
+const typeLabels = { word: 'слово', phrase: 'фраза', expression: 'вираз' };
+let allEntries = [];
+
+async function renderDictionary() {
+  allEntries = await getAll('dictionary');
+  renderCategoryFilters();
+  renderDictionaryList();
+  updateCategoryDatalist();
+}
+
+function renderCategoryFilters() {
+  const relevant = currentFilter === 'all' ? allEntries : allEntries.filter(e => e.type === currentFilter);
+  const cats = [...new Set(relevant.map(e => e.category).filter(Boolean))].sort();
+  const container = document.getElementById('categoryFilters');
+  if (cats.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = `<button class="cat-btn ${currentCategory === 'all' ? 'active' : ''}" data-cat="all" onclick="setCategory('all')">Все</button>` +
+    cats.map(c => `<button class="cat-btn ${currentCategory === c ? 'active' : ''}" data-cat="${esc(c)}" onclick="setCategory('${esc(c)}')">${esc(c)}</button>`).join('') +
+    `<button class="cat-btn ${currentCategory === '__recent__' ? 'active' : ''}" data-cat="__recent__" onclick="setCategory('__recent__')">Останні</button>`;
+}
+
+function renderDictionaryList() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  let filtered = allEntries.filter(e => {
+    if (currentFilter !== 'all' && e.type !== currentFilter) return false;
+    if (currentCategory !== 'all' && currentCategory !== '__recent__' && e.category !== currentCategory) return false;
+    if (query) {
+      return e.word.toLowerCase().includes(query) ||
+             e.translation.toLowerCase().includes(query) ||
+             (e.example && e.example.toLowerCase().includes(query)) ||
+             (e.category && e.category.toLowerCase().includes(query));
+    }
+    return true;
+  });
+  filtered.sort((a, b) => b.created - a.created);
+
+  const counts = { all: allEntries.length, word: 0, phrase: 0, expression: 0 };
+  allEntries.forEach(e => counts[e.type]++);
+
+  document.getElementById('stats').textContent =
+    `${filtered.length} з ${allEntries.length} записів (${counts.word} слів, ${counts.phrase} фраз, ${counts.expression} виразів)`;
+
+  const container = document.getElementById('entries');
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">~</div><p>${allEntries.length === 0 ? 'Словник порожній. Додай перше слово!' : 'Нічого не знайдено'}</p></div>`;
+    return;
+  }
+
+  if (currentCategory === '__recent__') {
+    container.innerHTML = `<div><div class="entry-group-title">Останні додані</div><div class="entry-group">${filtered.map(e => `
+      <div class="entry-card">
+        <span class="entry-word">${esc(e.word)}</span>
+        <span class="entry-sep">—</span>
+        <span class="entry-translation">${esc(e.translation)}</span>
+        <div class="entry-actions">
+          <button onclick="editEntry('${e.id}')">&#9998;</button>
+          <button class="delete" onclick="deleteEntry('${e.id}')">&times;</button>
+        </div>
+      </div>`).join('')}</div></div>`;
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(e => {
+    const cat = e.category || 'Без категорії';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(e);
+  });
+  const sortedCats = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'uk'));
+  container.innerHTML = sortedCats.map(cat => `
+    <div>
+      <div class="entry-group-title">${esc(cat)}</div>
+      <div class="entry-group">
+        ${groups[cat].map(e => `
+          <div class="entry-card">
+            <span class="entry-word">${esc(e.word)}</span>
+            <span class="entry-sep">—</span>
+            <span class="entry-translation">${esc(e.translation)}</span>
+            <div class="entry-actions">
+              <button onclick="editEntry('${e.id}')">&#9998;</button>
+              <button class="delete" onclick="deleteEntry('${e.id}')">&times;</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateCategoryDatalist() {
+  const cats = [...new Set(allEntries.map(e => e.category).filter(Boolean))].sort();
+  document.getElementById('categoryList').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+}
+
+function guessCategory(word) {
+  const w = word.trim().toLowerCase();
+  if (/^a\s/.test(w)) {
+    const irregulars = ['a bea','a lua','a da','a sta','a mânca','a tăia','a întârzia','a fi','a avea'];
+    return irregulars.some(v => w.startsWith(v)) ? 'Неправильні дієслова' : 'Дієслова';
+  }
+  const adj = ['os','oasă','ă','tor','toare','bil','bilă','esc','ească','iv','ivă','nic','nică','it','ită','at','ată','ut','ută'];
+  if (adj.some(s => w.endsWith(s)) && w.split(/\s+/).length === 1) return 'Прикметники';
+  const qWords = ['cine','ce','care','cât','câtă','câți','câte','unde','când','cum','de ce','pentru ce','de unde','până unde','până când','de când','la ce','cu cine','pe cine','despre ce','al cui','a cui'];
+  if (qWords.includes(w)) return 'Питальні слова';
+  const prep = ['în','pe','la','cu','din','de','pentru','lângă','între','spre','prin','sub','peste','după','fără','despre','contra','împreună'];
+  if (prep.includes(w)) return 'Прийменники';
+  return '';
+}
+
+function autoFillCategory() {
+  if (editingId) return;
+  const word = document.getElementById('formWord').value;
+  const cat = document.getElementById('formCategory');
+  const guess = guessCategory(word);
+  cat.value = guess;
+}
+
+function openModal(entry) {
+  editingId = entry ? entry.id : null;
+  document.getElementById('modalTitle').textContent = entry ? 'Редагувати' : 'Нове слово';
+  document.getElementById('formWord').value = entry ? entry.word : '';
+  document.getElementById('formTranslation').value = entry ? entry.translation : '';
+  document.getElementById('formType').value = entry ? entry.type : 'word';
+  document.getElementById('formCategory').value = entry ? (entry.category || '') : '';
+  document.getElementById('formExample').value = entry ? (entry.example || '') : '';
+  document.getElementById('entryModal').classList.add('open');
+  document.getElementById('formWord').focus();
+}
+
+function closeModal() {
+  document.getElementById('entryModal').classList.remove('open');
+  editingId = null;
+}
+
+async function saveEntry() {
+  const wordEl = document.getElementById('formWord');
+  const transEl = document.getElementById('formTranslation');
+  const word = wordEl.value.trim();
+  const translation = transEl.value.trim();
+  wordEl.style.borderColor = word ? '' : '#dc2626';
+  transEl.style.borderColor = translation ? '' : '#dc2626';
+  if (!word || !translation) return;
+
+  let created = Date.now();
+  if (editingId) {
+    const existing = allEntries.find(e => e.id === editingId);
+    if (existing) created = existing.created;
+  }
+
+  const entry = {
+    id: editingId || crypto.randomUUID(),
+    word, translation,
+    type: document.getElementById('formType').value,
+    category: document.getElementById('formCategory').value.trim(),
+    example: document.getElementById('formExample').value.trim(),
+    created, updated: Date.now()
+  };
+
+  await put('dictionary', entry);
+  closeModal();
+  renderDictionary();
+}
+
+async function editEntry(id) {
+  const entry = allEntries.find(e => e.id === id);
+  if (entry) openModal(entry);
+}
+
+async function deleteEntry(id) {
+  if (!confirm('Видалити запис?')) return;
+  await del('dictionary', id);
+  renderDictionary();
+}
+
+// Grammar
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+
+function handleFiles(files) {
+  pendingImages = [];
+  const readers = [];
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    readers.push(new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    }));
+  }
+  Promise.all(readers).then(results => { pendingImages = results; openGrammarModal(); });
+}
+
+function openGrammarModal(entry) {
+  editingGrammarId = entry ? entry.id : null;
+  document.getElementById('grammarModalTitle').textContent = entry ? 'Редагувати нотатку' : 'Нова нотатка';
+  document.getElementById('grammarFormTitle').value = entry ? entry.title : '';
+  document.getElementById('grammarFormCategory').value = entry ? (entry.category || '') : (currentGrammarCat !== 'all' ? currentGrammarCat : '');
+  document.getElementById('grammarFormNote').value = entry ? (entry.note || '') : '';
+  document.getElementById('grammarModal').classList.add('open');
+  document.getElementById('grammarFormTitle').focus();
+}
+
+function closeGrammarModal() {
+  document.getElementById('grammarModal').classList.remove('open');
+  editingGrammarId = null; pendingImages = [];
+}
+
+async function saveGrammarNote() {
+  const title = document.getElementById('grammarFormTitle').value.trim();
+  const category = document.getElementById('grammarFormCategory').value.trim();
+  const note = document.getElementById('grammarFormNote').value.trim();
+  if (editingGrammarId) {
+    const all = await getAll('grammar');
+    const entry = all.find(e => e.id === editingGrammarId);
+    if (entry) {
+      entry.title = title;
+      entry.category = category;
+      entry.note = note;
+      entry.updated = Date.now();
+      await put('grammar', entry);
+    }
+  } else if (pendingImages.length > 0) {
+    for (const img of pendingImages) {
+      await put('grammar', { id: crypto.randomUUID(), title: title || 'Без назви', category, note, image: img, created: Date.now() });
+    }
+  } else {
+    await put('grammar', { id: crypto.randomUUID(), title: title || 'Без назви', category, note, created: Date.now() });
+  }
+  closeGrammarModal(); renderGrammar();
+}
+
+function setGrammarCategory(cat) {
+  currentGrammarCat = cat;
+  document.querySelectorAll('#grammarCategoryFilters .cat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  renderGrammar();
+}
+
+async function renderGrammar() {
+  const items = await getAll('grammar');
+  const cats = [...new Set(items.map(e => e.category).filter(Boolean))].sort();
+  const catContainer = document.getElementById('grammarCategoryFilters');
+  if (cats.length > 0) {
+    catContainer.innerHTML = `<button class="cat-btn ${currentGrammarCat === 'all' ? 'active' : ''}" data-cat="all" onclick="setGrammarCategory('all')">Все</button>` +
+      cats.map(c => `<button class="cat-btn ${currentGrammarCat === c ? 'active' : ''}" data-cat="${esc(c)}" onclick="setGrammarCategory('${esc(c)}')">${esc(c)}</button>`).join('');
+  } else { catContainer.innerHTML = ''; }
+  const gcl = document.getElementById('grammarCatList');
+  if (gcl) gcl.innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+  const query = document.getElementById('grammarSearch').value.toLowerCase().trim();
+  let filtered = items.filter(e => {
+    if (currentGrammarCat !== 'all' && e.category !== currentGrammarCat) return false;
+    if (query) return (e.title && e.title.toLowerCase().includes(query)) || (e.note && e.note.toLowerCase().includes(query));
+    return true;
+  });
+  filtered.sort((a, b) => b.created - a.created);
+  const grid = document.getElementById('grammarGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">~</div><p>${items.length === 0 ? 'Ще немає скріншотів. Перетягни сюди зображення з уроку!' : 'Нічого не знайдено'}</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(e => `
+    <div class="grammar-card">
+      ${e.image ? `<img src="${e.image}" alt="${esc(e.title)}" onclick="openLightbox('${e.id}')">` :
+        (e.content ? `<div class="grammar-card-content" onclick="openLightbox('${e.id}')">${e.content}</div>` : '')}
+      <div class="grammar-card-info">
+        <div class="grammar-card-title">${esc(e.title)}</div>
+        ${e.note ? `<div class="grammar-card-note">${esc(e.note)}</div>` : ''}
+        <div class="grammar-date">${new Date(e.created).toLocaleDateString('uk-UA')}</div>
+      </div>
+      <div class="grammar-card-actions">
+        <button onclick="editGrammar('${e.id}')">Редагувати</button>
+        <button class="delete" onclick="deleteGrammar('${e.id}')">Видалити</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function editGrammar(id) { const all = await getAll('grammar'); const e = all.find(x => x.id === id); if (e) openGrammarModal(e); }
+async function deleteGrammar(id) { if (!confirm('Видалити скріншот?')) return; await del('grammar', id); renderGrammar(); }
+async function openLightbox(id) {
+  const all = await getAll('grammar'); const e = all.find(x => x.id === id); if (!e) return;
+  const img = document.getElementById('lightboxImg');
+  const html = document.getElementById('lightboxHtml');
+  if (e.image) { img.src = e.image; img.style.display = ''; html.style.display = 'none'; }
+  else if (e.content) { html.innerHTML = e.content; html.style.display = ''; img.style.display = 'none'; }
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+async function exportData() {
+  const dictionary = await getAll('dictionary');
+  const grammar = await getAll('grammar');
+  const blob = new Blob([JSON.stringify({ dictionary, grammar }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `romana-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+async function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.dictionary) for (const e of data.dictionary) await put('dictionary', e);
+    if (data.grammar) for (const e of data.grammar) await put('grammar', e);
+    renderDictionary(); renderGrammar();
+    alert('Імпорт завершено!');
+  } catch (e) { alert('Помилка імпорту: невірний формат файлу'); }
+  event.target.value = '';
+}
+
+const SEED_DATA = [
+{"id":"s01","word":"Iarna","translation":"зима","type":"word","category":"Іменники","example":""},
+{"id":"s02","word":"Primăvara","translation":"весна","type":"word","category":"Іменники","example":""},
+{"id":"s03","word":"Vara","translation":"літо","type":"word","category":"Іменники","example":""},
+{"id":"s04","word":"Toamna","translation":"осінь","type":"word","category":"Іменники","example":""},
+{"id":"s05","word":"anotimpul","translation":"пора року","type":"word","category":"Іменники","example":""},
+{"id":"d01","word":"Luni","translation":"понеділок (лунь)","type":"word","category":"Іменники","example":""},
+{"id":"d02","word":"Marți","translation":"вівторок (марць)","type":"word","category":"Іменники","example":""},
+{"id":"d03","word":"Miercuri","translation":"середа (мєркурь)","type":"word","category":"Іменники","example":""},
+{"id":"d04","word":"Joi","translation":"четвер (жой)","type":"word","category":"Іменники","example":""},
+{"id":"d05","word":"Vineri","translation":"п'ятниця (вінерь)","type":"word","category":"Іменники","example":""},
+{"id":"d06","word":"Sâmbătă","translation":"і'субота (симбете)","type":"word","category":"Іменники","example":""},
+{"id":"d07","word":"Duminică","translation":"неділя (думініке)","type":"word","category":"Іменники","example":""},
+{"id":"m01","word":"Ianuarie","translation":"січень (януарє)","type":"word","category":"Іменники","example":""},
+{"id":"m02","word":"Februarie","translation":"лютий","type":"word","category":"Іменники","example":""},
+{"id":"m03","word":"Martie","translation":"березень (мартє)","type":"word","category":"Іменники","example":""},
+{"id":"m04","word":"Aprilie","translation":"квітень","type":"word","category":"Іменники","example":""},
+{"id":"m05","word":"Mai","translation":"травень","type":"word","category":"Іменники","example":""},
+{"id":"m06","word":"Iunie","translation":"червень (юнє)","type":"word","category":"Іменники","example":""},
+{"id":"m07","word":"Iulie","translation":"липень (юлє)","type":"word","category":"Іменники","example":""},
+{"id":"m08","word":"August","translation":"серпень","type":"word","category":"Іменники","example":""},
+{"id":"m09","word":"Septembrie","translation":"вересень","type":"word","category":"Іменники","example":""},
+{"id":"m10","word":"Octombrie","translation":"жовтень","type":"word","category":"Іменники","example":""},
+{"id":"m11","word":"Noiembrie","translation":"листопад","type":"word","category":"Іменники","example":""},
+{"id":"m12","word":"Decembrie","translation":"грудень (дечємбрє)","type":"word","category":"Іменники","example":""},
+{"id":"t01","word":"lună","translation":"місяць","type":"word","category":"Іменники","example":""},
+{"id":"t02","word":"an","translation":"рік","type":"word","category":"Іменники","example":""},
+{"id":"t03","word":"zi","translation":"день (зі)","type":"word","category":"Іменники","example":""},
+{"id":"t04","word":"săptămână","translation":"тиждень (саптамине)","type":"word","category":"Іменники","example":""},
+{"id":"t05","word":"acum","translation":"зараз","type":"word","category":"Іменники","example":""},
+{"id":"t06","word":"vremea","translation":"погода","type":"word","category":"Іменники","example":""},
+{"id":"p01","word":"la universitate","translation":"в університеті","type":"word","category":"Іменники","example":""},
+{"id":"p02","word":"sală de curs","translation":"аудиторія, лекційний зал","type":"word","category":"Іменники","example":""},
+{"id":"p03","word":"sală de lectură","translation":"читальний зал","type":"word","category":"Іменники","example":""},
+{"id":"p04","word":"bibliotecă","translation":"бібліотека","type":"word","category":"Іменники","example":""},
+{"id":"p05","word":"acasă","translation":"вдома","type":"word","category":"Іменники","example":""},
+{"id":"p06","word":"catedră","translation":"кафедра (стіл викладача)","type":"word","category":"Іменники","example":""},
+{"id":"p07","word":"aici","translation":"тут","type":"word","category":"Іменники","example":""},
+{"id":"p08","word":"acolo","translation":"там","type":"word","category":"Іменники","example":""},
+{"id":"p09","word":"oraș","translation":"місто","type":"word","category":"Іменники","example":""},
+{"id":"p10","word":"Afară","translation":"на вулиці, ззовні","type":"word","category":"Іменники","example":""},
+{"id":"r01","word":"perete (pe perete)","translation":"стіна (на стіні)","type":"word","category":"Іменники","example":""},
+{"id":"r02","word":"tablă","translation":"дошка","type":"word","category":"Іменники","example":""},
+{"id":"r03","word":"dulap (în dulap)","translation":"шафа (у шафі)","type":"word","category":"Іменники","example":""},
+{"id":"r04","word":"fereastră","translation":"вікно","type":"word","category":"Іменники","example":""},
+{"id":"r05","word":"ușă","translation":"двері","type":"word","category":"Іменники","example":""},
+{"id":"r06","word":"masă (pe masă)","translation":"стіл (на столі)","type":"word","category":"Іменники","example":""},
+{"id":"r07","word":"scaun","translation":"стілець","type":"word","category":"Іменники","example":""},
+{"id":"r08","word":"lampă","translation":"лампа","type":"word","category":"Іменники","example":""},
+{"id":"r09","word":"scară","translation":"сходи","type":"word","category":"Іменники","example":""},
+{"id":"r10","word":"clădirea","translation":"будівля","type":"word","category":"Іменники","example":""},
+{"id":"k01","word":"hartă","translation":"карта (мапа)","type":"word","category":"Іменники","example":""},
+{"id":"k02","word":"carte","translation":"книжка","type":"word","category":"Іменники","example":""},
+{"id":"k03","word":"revistă","translation":"журнал","type":"word","category":"Іменники","example":""},
+{"id":"k04","word":"ziar","translation":"газета","type":"word","category":"Іменники","example":""},
+{"id":"k05","word":"caiet","translation":"зошит","type":"word","category":"Іменники","example":""},
+{"id":"k06","word":"creion","translation":"олівець","type":"word","category":"Іменники","example":""},
+{"id":"k07","word":"stilou","translation":"ручка (перова або чорнильна)","type":"word","category":"Іменники","example":""},
+{"id":"k08","word":"pix","translation":"шарикова ручка","type":"word","category":"Іменники","example":""},
+{"id":"l01","word":"student","translation":"студент","type":"word","category":"Іменники","example":""},
+{"id":"l02","word":"elev","translation":"учень","type":"word","category":"Іменники","example":""},
+{"id":"l03","word":"colegă","translation":"колега (подруга по навчанню/роботі)","type":"word","category":"Іменники","example":""},
+{"id":"l04","word":"coleg","translation":"колега (чоловічий рід)","type":"word","category":"Іменники","example":""},
+{"id":"l05","word":"femei","translation":"жінки","type":"word","category":"Іменники","example":""},
+{"id":"l06","word":"bărbați","translation":"чоловіки","type":"word","category":"Іменники","example":""},
+{"id":"l07","word":"Doamna","translation":"пані (місіс)","type":"word","category":"Іменники","example":""},
+{"id":"l08","word":"Domnisoara","translation":"панно (міс - молода незаміжня)","type":"word","category":"Іменники","example":""},
+{"id":"f01","word":"familie","translation":"сім'я","type":"word","category":"Іменники","example":""},
+{"id":"f02","word":"membru al familiei","translation":"член сім'ї","type":"word","category":"Іменники","example":""},
+{"id":"f03","word":"mamă","translation":"мама","type":"word","category":"Іменники","example":""},
+{"id":"f04","word":"tată","translation":"тато","type":"word","category":"Іменники","example":""},
+{"id":"f05","word":"părinți","translation":"батьки","type":"word","category":"Іменники","example":""},
+{"id":"f06","word":"soră","translation":"сестра","type":"word","category":"Іменники","example":""},
+{"id":"f07","word":"frate","translation":"брат","type":"word","category":"Іменники","example":""},
+{"id":"f08","word":"bunică","translation":"бабуся","type":"word","category":"Іменники","example":""},
+{"id":"f09","word":"bunic","translation":"дідусь","type":"word","category":"Іменники","example":""},
+{"id":"f10","word":"străbunică","translation":"прабабуся","type":"word","category":"Іменники","example":""},
+{"id":"f11","word":"străbunic","translation":"прадідусь","type":"word","category":"Іменники","example":""},
+{"id":"f12","word":"unchi","translation":"дядько","type":"word","category":"Іменники","example":""},
+{"id":"f13","word":"mătușă","translation":"тітка","type":"word","category":"Іменники","example":""},
+{"id":"f14","word":"văr","translation":"двоюрідний брат","type":"word","category":"Іменники","example":""},
+{"id":"f15","word":"verișoară","translation":"двоюрідна сестра","type":"word","category":"Іменники","example":""},
+{"id":"f16","word":"nepot","translation":"племінник / онук","type":"word","category":"Іменники","example":""},
+{"id":"f17","word":"nepoată","translation":"племінниця / онука","type":"word","category":"Іменники","example":""},
+{"id":"f18","word":"soț","translation":"чоловік","type":"word","category":"Іменники","example":""},
+{"id":"f19","word":"soție","translation":"дружина","type":"word","category":"Іменники","example":""},
+{"id":"f20","word":"copil","translation":"дитина","type":"word","category":"Іменники","example":""},
+{"id":"f21","word":"fiu","translation":"син","type":"word","category":"Іменники","example":""},
+{"id":"f22","word":"fiică","translation":"донька","type":"word","category":"Іменники","example":""},
+{"id":"f23","word":"noastră","translation":"наша","type":"word","category":"Іменники","example":"familie noastră este numeroasă — наша родина велика"},
+{"id":"a01","word":"mare","translation":"велика","type":"word","category":"Прикметники","example":""},
+{"id":"a02","word":"mică","translation":"маленька","type":"word","category":"Прикметники","example":""},
+{"id":"a03","word":"unită","translation":"дружня","type":"word","category":"Прикметники","example":""},
+{"id":"a04","word":"fericită","translation":"щаслива","type":"word","category":"Прикметники","example":""},
+{"id":"a05","word":"prietenoasă","translation":"дружелюбна","type":"word","category":"Прикметники","example":""},
+{"id":"a06","word":"iubitoare","translation":"любляча","type":"word","category":"Прикметники","example":""},
+{"id":"a07","word":"înțelegătoare","translation":"розуміюча","type":"word","category":"Прикметники","example":""},
+{"id":"a08","word":"respectuoasă","translation":"шаноблива","type":"word","category":"Прикметники","example":""},
+{"id":"a09","word":"grijulie","translation":"турботлива","type":"word","category":"Прикметники","example":""},
+{"id":"a10","word":"veselă","translation":"весела","type":"word","category":"Прикметники","example":""},
+{"id":"v01","word":"a cânta","translation":"співати","type":"word","category":"Дієслова","example":""},
+{"id":"v02","word":"a alerga","translation":"бігати / бігти","type":"word","category":"Дієслова","example":""},
+{"id":"v03","word":"a juca","translation":"грати","type":"word","category":"Дієслова","example":""},
+{"id":"v04","word":"a învăța","translation":"вчитися / вчити","type":"word","category":"Дієслова","example":""},
+{"id":"v05","word":"a termina","translation":"закінчувати","type":"word","category":"Дієслова","example":""},
+{"id":"v06","word":"a urca","translation":"підніматися","type":"word","category":"Дієслова","example":""},
+{"id":"v07","word":"a discuta","translation":"обговорювати","type":"word","category":"Дієслова","example":""},
+{"id":"v08","word":"a repara","translation":"ремонтувати","type":"word","category":"Дієслова","example":""},
+{"id":"v09","word":"a pleca","translation":"йти / від'їжджати","type":"word","category":"Дієслова","example":""},
+{"id":"v10","word":"a încerca","translation":"пробувати","type":"word","category":"Дієслова","example":""},
+{"id":"v11","word":"a aștepta","translation":"чекати","type":"word","category":"Дієслова","example":""},
+{"id":"v12","word":"a întreba","translation":"запитувати","type":"word","category":"Дієслова","example":""},
+{"id":"v13","word":"a ruga","translation":"просити","type":"word","category":"Дієслова","example":""},
+{"id":"v14","word":"a purta","translation":"носити","type":"word","category":"Дієслова","example":""},
+{"id":"v15","word":"a zbura","translation":"літати","type":"word","category":"Дієслова","example":""},
+{"id":"v16","word":"a spăla","translation":"мити","type":"word","category":"Дієслова","example":""},
+{"id":"v17","word":"a desena","translation":"малювати","type":"word","category":"Дієслова","example":""},
+{"id":"v18","word":"a ajuta","translation":"допомагати","type":"word","category":"Дієслова","example":""},
+{"id":"v19","word":"a căuta","translation":"шукати","type":"word","category":"Дієслова","example":""},
+{"id":"v20","word":"a asculta","translation":"слухати","type":"word","category":"Дієслова","example":""},
+{"id":"v21","word":"a lucra","translation":"працювати","type":"word","category":"Дієслова","example":""},
+{"id":"v22","word":"a putea (eu pot)","translation":"могти","type":"word","category":"Дієслова","example":""},
+{"id":"v23","word":"a vrea (eu vreau)","translation":"хотіти","type":"word","category":"Дієслова","example":""},
+{"id":"v24","word":"a traversa","translation":"перетинати","type":"word","category":"Дієслова","example":""},
+{"id":"v25","word":"a vizita","translation":"навідувати","type":"word","category":"Дієслова","example":""},
+{"id":"v26","word":"a schia","translation":"кататися на лижах","type":"word","category":"Дієслова","example":""},
+{"id":"v27","word":"a închinia","translation":"орендувати","type":"word","category":"Дієслова","example":""},
+{"id":"v28","word":"a picta","translation":"малювати (писати картини)","type":"word","category":"Дієслова","example":""},
+{"id":"v29","word":"a fuma","translation":"курити","type":"word","category":"Дієслова","example":""},
+{"id":"v30","word":"a studia","translation":"вивчати","type":"word","category":"Дієслова","example":""},
+{"id":"v31","word":"a conversa","translation":"розмовляти","type":"word","category":"Дієслова","example":""},
+{"id":"v32","word":"a dansa","translation":"танцювати","type":"word","category":"Дієслова","example":""},
+{"id":"v33","word":"a completa","translation":"доповнювати","type":"word","category":"Дієслова","example":""},
+{"id":"v34","word":"a corecta","translation":"виправляти","type":"word","category":"Дієслова","example":""},
+{"id":"v35","word":"a locui","translation":"жити","type":"word","category":"Дієслова","example":"Unde locuiești?"},
+{"id":"iv01","word":"a bea","translation":"пити","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"iv02","word":"a lua","translation":"брати, отримувати, купувати, сідати на транспорт","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"iv03","word":"a da","translation":"давати","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"iv04","word":"a sta","translation":"знаходитись, стояти, лежати, сидіти","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"iv05","word":"a mânca","translation":"їсти","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"iv06","word":"a tăia","translation":"різати","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"iv07","word":"a întârzia","translation":"запізнюватися","type":"word","category":"Неправильні дієслова","example":""},
+{"id":"fd01","word":"micul dejun","translation":"сніданок (буквально «малий прийом їжі»)","type":"word","category":"Іменники","example":""},
+{"id":"fd02","word":"prânz","translation":"обід","type":"word","category":"Іменники","example":""},
+{"id":"fd03","word":"cină","translation":"вечеря","type":"word","category":"Іменники","example":""},
+{"id":"fd04","word":"gustare","translation":"перекус","type":"word","category":"Іменники","example":""},
+{"id":"fd05","word":"budincă","translation":"пудинг","type":"word","category":"Іменники","example":""},
+{"id":"fd06","word":"ouă","translation":"яйця","type":"word","category":"Іменники","example":""},
+{"id":"pr01","word":"lângă","translation":"біля, поруч із","type":"word","category":"Прийменники","example":""},
+{"id":"pr02","word":"pe","translation":"на","type":"word","category":"Прийменники","example":""},
+{"id":"pr03","word":"în","translation":"в, у","type":"word","category":"Прийменники","example":""},
+{"id":"pr04","word":"și","translation":"і, та, також","type":"word","category":"Прийменники","example":""},
+{"id":"pr05","word":"cu","translation":"з (кимось/чимось)","type":"word","category":"Прийменники","example":""},
+{"id":"pr06","word":"iată","translation":"ось (ось є...)","type":"word","category":"Прийменники","example":""},
+{"id":"pr07","word":"împreună","translation":"разом","type":"word","category":"Прийменники","example":""},
+{"id":"ob01","word":"copac","translation":"дерево (НЕ плодове)","type":"word","category":"Іменники","example":""},
+{"id":"ob02","word":"tablou","translation":"картина / зображення","type":"word","category":"Іменники","example":""},
+{"id":"ob03","word":"greșelile","translation":"помилки","type":"word","category":"Іменники","example":""},
+{"id":"ob04","word":"corpul","translation":"тіло","type":"word","category":"Іменники","example":""},
+{"id":"ob05","word":"minge","translation":"м'яч","type":"word","category":"Іменники","example":""},
+{"id":"ob06","word":"ochelari","translation":"окуляри","type":"word","category":"Іменники","example":""},
+{"id":"ob07","word":"cheie / cheile","translation":"ключ / ключі","type":"word","category":"Іменники","example":""},
+{"id":"ob08","word":"buzunar","translation":"кишеня","type":"word","category":"Іменники","example":""},
+{"id":"ob09","word":"geantă","translation":"сумка (джя́нте)","type":"word","category":"Іменники","example":""},
+{"id":"ob10","word":"geacă","translation":"куртка","type":"word","category":"Іменники","example":""},
+{"id":"ob11","word":"fiecare","translation":"кожен","type":"word","category":"Іменники","example":""},
+{"id":"ob12","word":"răcoare","translation":"прохолодно","type":"word","category":"Іменники","example":""},
+{"id":"ob13","word":"puțin","translation":"мало, трішки","type":"word","category":"Іменники","example":""},
+{"id":"ob14","word":"întotdeauna","translation":"завжди","type":"word","category":"Іменники","example":""},
+{"id":"ph01","word":"Eu sunt Katea","translation":"Я Катя","type":"phrase","category":"Знайомство","example":""},
+{"id":"ph02","word":"Eu sunt din regiunea Mâkolaiv","translation":"я з Миколаївської області","type":"phrase","category":"Знайомство","example":""},
+{"id":"ph03","word":"Eu sunt manager","translation":"я менеджер","type":"phrase","category":"Знайомство","example":""},
+{"id":"ph04","word":"Eu sunt în București","translation":"я в Бухаресті","type":"phrase","category":"Знайомство","example":""},
+{"id":"ph05","word":"Eu am 31 (treizeci și unu) de ani","translation":"мені є 31 (після 20 завжди ставимо de)","type":"phrase","category":"Знайомство","example":""},
+{"id":"ph06","word":"Mă bucur să te cunosc","translation":"Я радий познайомитися","type":"phrase","category":"Знайомство","example":""},
+{"id":"ph10","word":"Ce lună este acum?","translation":"який зараз місяць","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph11","word":"Acum este Iunie","translation":"зараз червень","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph12","word":"În ce lună v-ați născut?","translation":"в якому місяці ти народився","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph13","word":"Eu m-am născut în februarie","translation":"я народилася в лютому","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph14","word":"Ce anotimp este acum?","translation":"яка зараз пора року?","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph15","word":"Anotimpul preferat este vara","translation":"улюблена пора року є літо","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph16","word":"Ce zi este azi / astăzi?","translation":"який день є сьогодні","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph17","word":"Azi este marți","translation":"сьогодні є вівторок","type":"phrase","category":"Час та дати","example":""},
+{"id":"ph30","word":"Zi bună","translation":"гарного дня!","type":"phrase","category":"Привітання","example":""},
+{"id":"ph31","word":"Zi frumosă","translation":"чудового дня!","type":"phrase","category":"Привітання","example":""},
+{"id":"ph32","word":"Bună dimineața!","translation":"доброго ранку!","type":"phrase","category":"Привітання","example":""},
+{"id":"ph33","word":"Bună seara!","translation":"добрий вечір!","type":"phrase","category":"Привітання","example":""},
+{"id":"ph34","word":"Noapte bună!","translation":"доброї ночі (добраніч)","type":"phrase","category":"Привітання","example":""},
+{"id":"ph35","word":"La fel","translation":"Вам теж","type":"phrase","category":"Привітання","example":""},
+{"id":"ph40","word":"Cum este vremea?","translation":"Як погода?","type":"phrase","category":"Погода","example":""},
+{"id":"ph41","word":"Vremea este caldă","translation":"Погода є тепла","type":"phrase","category":"Погода","example":""},
+{"id":"ph42","word":"Vremea este însorită","translation":"Погода є сонячна","type":"phrase","category":"Погода","example":""},
+{"id":"ph43","word":"Afară este răcoare","translation":"Надворі прохолодно","type":"phrase","category":"Погода","example":""},
+{"id":"ph44","word":"Astăzi este frig","translation":"Сьогодні є холодно","type":"phrase","category":"Погода","example":""},
+{"id":"ph45","word":"Astăzi este foarte cald","translation":"Сьогодні є дуже тепло","type":"phrase","category":"Погода","example":""},
+{"id":"ph50","word":"Ce faceți?","translation":"Що ви робите?","type":"phrase","category":"Розмова","example":""},
+{"id":"ph51","word":"Ce faci?","translation":"Що ти робиш?","type":"phrase","category":"Розмова","example":""},
+{"id":"ph52","word":"Mulțumesc bine","translation":"дякую, добре","type":"phrase","category":"Розмова","example":""},
+{"id":"ph53","word":"Dar dumneavoastră?","translation":"А у Вас?","type":"phrase","category":"Розмова","example":""},
+{"id":"ph54","word":"este greu","translation":"важко","type":"phrase","category":"Розмова","example":""},
+{"id":"ph55","word":"este ușor","translation":"легко","type":"phrase","category":"Розмова","example":""},
+{"id":"ph56","word":"Fiindcă","translation":"тому що ..","type":"phrase","category":"Розмова","example":""},
+{"id":"ph57","word":"Cum vă simțiți","translation":"як себе почуваєте?","type":"phrase","category":"Розмова","example":""},
+{"id":"ph58","word":"Foarte bine, mulțumesc!","translation":"Дуже добре, дякую!","type":"phrase","category":"Розмова","example":""},
+{"id":"ph59","word":"cât de des..","translation":"як часто..","type":"phrase","category":"Розмова","example":""},
+{"id":"ph60","word":"aproape de","translation":"біля, поруч, неподалік (про місце)","type":"phrase","category":"Розмова","example":"Suntem aproape de gară. — Ми поруч із вокзалом."},
+{"id":"ph61","word":"aproximativ","translation":"близько, приблизно (про число, час)","type":"phrase","category":"Розмова","example":"Am aproximativ 30 de ani."},
+{"id":"ph70","word":"La ce oră începeți să lucrați?","translation":"о якій годині Ви починаєте працювати?","type":"phrase","category":"Робота","example":""},
+{"id":"ph71","word":"Lucrez de la 9","translation":"працюю з 9","type":"phrase","category":"Робота","example":""},
+{"id":"ph72","word":"Până la ce oră lucrați?","translation":"До котрої години ви працюєте?","type":"phrase","category":"Робота","example":""},
+{"id":"ph73","word":"Lucrez până la ora 6","translation":"працюю до 6","type":"phrase","category":"Робота","example":""},
+{"id":"q01","word":"cine","translation":"хто","type":"expression","category":"Питальні слова","example":"Cine este acolo?"},
+{"id":"q02","word":"ce","translation":"що","type":"expression","category":"Питальні слова","example":"Ce mănânci?"},
+{"id":"q03","word":"care","translation":"який/яка","type":"expression","category":"Питальні слова","example":"Care este casa ta?"},
+{"id":"q04","word":"cât","translation":"скільки (чол. рід, однина)","type":"expression","category":"Питальні слова","example":"Cât costă pâinea?"},
+{"id":"q05","word":"câtă","translation":"скільки (жін. рід, однина)","type":"expression","category":"Питальні слова","example":"Câtă apă vrei?"},
+{"id":"q06","word":"câți","translation":"скільки (чол. рід, множина)","type":"expression","category":"Питальні слова","example":"Câți ani ai?"},
+{"id":"q07","word":"câte","translation":"скільки (жін. рід, множина)","type":"expression","category":"Питальні слова","example":"Câte mere ai?"},
+{"id":"q08","word":"unde","translation":"де / куди","type":"expression","category":"Питальні слова","example":"Unde stai?"},
+{"id":"q09","word":"de unde","translation":"звідки","type":"expression","category":"Питальні слова","example":"De unde ești?"},
+{"id":"q10","word":"până unde","translation":"докуди / до якого місця","type":"expression","category":"Питальні слова","example":"Până unde mergem?"},
+{"id":"q11","word":"când","translation":"коли","type":"expression","category":"Питальні слова","example":"Când pleci?"},
+{"id":"q12","word":"de când","translation":"відколи / з якого часу","type":"expression","category":"Питальні слова","example":"De când ești aici?"},
+{"id":"q13","word":"până când","translation":"до коли","type":"expression","category":"Питальні слова","example":"Până când stai?"},
+{"id":"q14","word":"cum","translation":"як","type":"expression","category":"Питальні слова","example":"Cum te cheamă?"},
+{"id":"q15","word":"de ce","translation":"чому / через що","type":"expression","category":"Питальні слова","example":"De ce plângi?"},
+{"id":"q16","word":"pentru ce","translation":"для чого","type":"expression","category":"Питальні слова","example":"Pentru ce ai nevoie?"},
+{"id":"q17","word":"la ce","translation":"для чого / на що","type":"expression","category":"Питальні слова","example":"La ce te uiți?"},
+{"id":"q18","word":"cu cine","translation":"з ким","type":"expression","category":"Питальні слова","example":"Cu cine mergi?"},
+{"id":"q19","word":"pe cine","translation":"кого","type":"expression","category":"Питальні слова","example":"Pe cine vezi?"},
+{"id":"q20","word":"despre ce","translation":"про що","type":"expression","category":"Питальні слова","example":"Despre ce vorbești?"},
+{"id":"q21","word":"al cui","translation":"чий (чол. рід, однина)","type":"expression","category":"Питальні слова","example":"Al cui este pixul?"},
+{"id":"q22","word":"a cui","translation":"чия (жін. рід, однина)","type":"expression","category":"Питальні слова","example":"A cui este cartea?"},
+{"id":"q23","word":"ai cui","translation":"чиї (чол. рід, множина)","type":"expression","category":"Питальні слова","example":"Ai cui sunt părinții?"},
+{"id":"q24","word":"ale cui","translation":"чиї (жін. рід, множина)","type":"expression","category":"Питальні слова","example":"Ale cui sunt florile?"},
+{"id":"q25","word":"ce fel de","translation":"який вид / який саме","type":"expression","category":"Питальні слова","example":"Ce fel de muzică îți place?"},
+{"id":"q26","word":"ceva","translation":"щось","type":"expression","category":"Питальні слова","example":""},
+{"id":"q27","word":"cineva","translation":"когось","type":"expression","category":"Питальні слова","example":""},
+{"id":"gr01","word":"că","translation":"що (приєднує ціле речення)","type":"expression","category":"Граматичні частки","example":""},
+{"id":"gr02","word":"să","translation":"вводить дієслово після іншого","type":"expression","category":"Граматичні частки","example":"Vreau să mănânc."}
+];
+
+const GRAMMAR_SEEDS = [
+  { id:'g01', title:'A fi — бути', category:'Теперішній час', note:'Відмінювання дієслова "бути" з заперечними формами',
+    content:`<table><tr><th>Особа</th><th>Форма</th><th>Заперечна</th></tr>
+<tr><td>Eu</td><td><b>sunt</b> — я є</td><td>eu nu sunt</td></tr>
+<tr><td>Tu</td><td><b>ești</b> — ти є</td><td>tu nu ești</td></tr>
+<tr><td>El/Ea</td><td><b>este</b> — він/вона є</td><td>el nu este / nu-i</td></tr>
+<tr><td>Noi</td><td><b>suntem</b> — ми є</td><td>noi nu suntem</td></tr>
+<tr><td>Voi</td><td><b>sunteți</b> — ви є</td><td>voi nu sunteți</td></tr>
+<tr><td>Ei/Ele</td><td><b>sunt</b> — вони є</td><td>ei, ele nu sunt</td></tr></table>` },
+  { id:'g02', title:'A avea — мати', note:'Відмінювання дієслова "мати" з заперечними формами',
+    content:`<table><tr><th>Особа</th><th>Форма</th><th>Заперечна</th></tr>
+<tr><td>Eu</td><td><b>am</b> — я маю</td><td>eu nu am / n-am</td></tr>
+<tr><td>Tu</td><td><b>ai</b> — ти маєш</td><td>tu nu ai / n-ai</td></tr>
+<tr><td>El/Ea</td><td><b>are</b> — він/вона має</td><td>el nu are / n-are</td></tr>
+<tr><td>Noi</td><td><b>avem</b> — ми маємо</td><td>noi nu avem / n-avem</td></tr>
+<tr><td>Voi</td><td><b>aveți</b> — ви маєте</td><td>voi nu aveți / n-aveți</td></tr>
+<tr><td>Ei/Ele</td><td><b>au</b> — вони мають</td><td>ei, ele nu au / n-au</td></tr></table>` },
+  { id:'g03', title:'Займенники', note:'Особові займенники румунською',
+    content:`<table><tr><th>Укр.</th><th>Рум.</th></tr>
+<tr><td>я</td><td><b>Eu</b></td></tr>
+<tr><td>ти</td><td><b>Tu</b></td></tr>
+<tr><td>він</td><td><b>El</b></td></tr>
+<tr><td>вона</td><td><b>Ea</b></td></tr>
+<tr><td>ми</td><td><b>Noi</b></td></tr>
+<tr><td>ви</td><td><b>Voi</b></td></tr>
+<tr><td>вони</td><td><b>Ei, Ele</b></td></tr></table>` },
+  { id:'g04', title:'1 група дієслів — закінчення "-a"', note:'В інфінітиві наголос завжди на останню букву. Найпростіші дієслова.',
+    content:`<p>Коли закінчення на <b>"-a"</b> — це найпростіша група.</p>
+<p>Коли закінчення на <b>"-ez"</b> — немає чіткого правила, просто деякі дієслова звучать з -ez, деякі ні.</p>` },
+  { id:'g05', title:'A tăia — різати (відмінювання)', note:'Приклад відмінювання дієслова',
+    content:`<table><tr><th>Особа</th><th>Форма</th></tr>
+<tr><td>eu</td><td><b>tai</b></td></tr>
+<tr><td>tu</td><td><b>tai</b></td></tr>
+<tr><td>el/ea</td><td><b>taie</b></td></tr>
+<tr><td>noi</td><td><b>tăiem</b></td></tr>
+<tr><td>voi</td><td><b>tăiați</b></td></tr>
+<tr><td>ei/ele</td><td><b>taie</b></td></tr></table>` },
+  { id:'g06', title:'A întârzia — запізнюватися (відмінювання)', note:'Приклад відмінювання дієслова',
+    content:`<table><tr><th>Особа</th><th>Форма</th></tr>
+<tr><td>eu</td><td><b>întârzii</b></td></tr>
+<tr><td>tu</td><td><b>întârzii</b></td></tr>
+<tr><td>el/ea</td><td><b>întârzie</b></td></tr>
+<tr><td>noi</td><td><b>întârziem</b></td></tr>
+<tr><td>voi</td><td><b>întârziați</b></td></tr>
+<tr><td>ei/ele</td><td><b>întârzie</b></td></tr></table>` },
+  { id:'g07', title:'A lua — брати (значення)', note:'Неправильне дієслово з багатьма значеннями',
+    content:`<p><b>A lua</b> — має багато значень:</p>
+<ul><li>Брати</li><li>Отримувати</li><li>Купувати</li><li>Сідати на транспорт</li><li>Приймати (ліки)</li><li>Забирати когось</li></ul>` },
+  { id:'g08', title:'A sta — знаходитись (значення)', note:'Неправильне дієслово з багатьма значеннями',
+    content:`<p><b>A sta</b> — має багато значень:</p>
+<ul><li>Стояти (вертикально)</li><li>Бути, перебувати, знаходитися</li><li>Жити, мешкати</li><li>Залишатися</li><li>Сидіти</li><li>Лежати (про предмети)</li><li>Проводити час</li></ul>` },
+  { id:'g09', title:'Правила вимови', note:'Як читати комбінації літер c, ch, g',
+    content:`<div class="rule">c + e = че / че*</div>
+<p class="example">ce — що, cine — хто</p>
+<div class="rule">c + h + e = ке</div>
+<p class="example">cheie — ключ</p>
+<div class="rule">g + e = дже / дже*</div>
+<p class="example">gest — жест</p>
+<div class="rule">î / â</div>
+<p class="example">Обидва читаються однаково — як глибоке "и"</p>` }
+];
+
+const NOUN_CATS = ['Пори року','Дні тижня','Місяці','Час','Місця','Меблі та кімната','Канцелярія','Люди',"Сім'я",'Їжа','Різне'];
+async function migrateNouns() {
+  const all = await getAll('dictionary');
+  for (const e of all) {
+    if (NOUN_CATS.includes(e.category)) {
+      e.category = 'Іменники';
+      await put('dictionary', e);
+    }
+  }
+}
+
+async function autoImport() {
+  const existingDict = await getAll('dictionary');
+  if (existingDict.length === 0) {
+    const now = Date.now();
+    for (let i = 0; i < SEED_DATA.length; i++) {
+      await put('dictionary', { ...SEED_DATA[i], created: now - (SEED_DATA.length - i) * 1000, updated: now });
+    }
+  }
+  const existingGrammar = await getAll('grammar');
+  if (existingGrammar.length === 0) {
+    const now = Date.now();
+    for (let i = 0; i < GRAMMAR_SEEDS.length; i++) {
+      await put('grammar', { ...GRAMMAR_SEEDS[i], created: now - (GRAMMAR_SEEDS.length - i) * 1000 });
+    }
+  }
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeGrammarModal(); closeLightbox(); }
+});
+
+openDB().then(() => { autoImport().then(() => migrateNouns()).then(() => { renderDictionary(); renderGrammar(); }); });
+</script>
+</body>
+</html>
