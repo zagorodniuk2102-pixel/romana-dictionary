@@ -510,7 +510,7 @@ async function saveEntry() {
 
   await put('dictionary', entry);
   closeModal();
-  renderDictionary();
+  await renderDictionary();
 }
 
 async function editEntry(id) {
