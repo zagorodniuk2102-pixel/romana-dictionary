@@ -461,10 +461,15 @@ function guessCategory(word) {
 
 function autoFillCategory() {
   if (editingId) return;
-  const word = document.getElementById('formWord').value;
+  const word = document.getElementById('formWord').value.trim();
   const cat = document.getElementById('formCategory');
   const guess = guessCategory(word);
   cat.value = guess;
+  const spaces = (word.match(/ /g) || []).length;
+  const typeEl = document.getElementById('formType');
+  if (spaces >= 3) typeEl.value = 'expression';
+  else if (spaces >= 1) typeEl.value = 'phrase';
+  else typeEl.value = 'word';
 }
 
 function openModal(entry) {
@@ -510,6 +515,11 @@ async function saveEntry() {
 
   await put('dictionary', entry);
   closeModal();
+  currentFilter = 'all';
+  currentCategory = '__recent__';
+  document.querySelectorAll('#typeFilters .filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === 'all');
+  });
   await renderDictionary();
 }
 
