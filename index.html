@@ -960,6 +960,48 @@ const GRAMMAR_SEEDS = [
   { id:'g08', title:'A sta — знаходитись (значення)', note:'Неправильне дієслово з багатьма значеннями',
     content:`<p><b>A sta</b> — має багато значень:</p>
 <ul><li>Стояти (вертикально)</li><li>Бути, перебувати, знаходитися</li><li>Жити, мешкати</li><li>Залишатися</li><li>Сидіти</li><li>Лежати (про предмети)</li><li>Проводити час</li></ul>` },
+  { id:'g10', title:'Минулий час — як утворюється', category:'Минулий час', note:'Perfectul compus — основний минулий час у розмовній румунській',
+    content:`<p><b>Формула:</b> допоміжне дієслово <b>a avea</b> + дієприкметник</p>
+<table><tr><th>Особа</th><th>Допоміжне</th><th>+ дієприкметник</th></tr>
+<tr><td>Eu</td><td><b>am</b></td><td>lucrat</td></tr>
+<tr><td>Tu</td><td><b>ai</b></td><td>lucrat</td></tr>
+<tr><td>El/Ea</td><td><b>a</b></td><td>lucrat</td></tr>
+<tr><td>Noi</td><td><b>am</b></td><td>lucrat</td></tr>
+<tr><td>Voi</td><td><b>ați</b></td><td>lucrat</td></tr>
+<tr><td>Ei/Ele</td><td><b>au</b></td><td>lucrat</td></tr></table>` },
+  { id:'g11', title:'Дієприкметник — закінчення', category:'Минулий час', note:'Як утворити дієприкметник від різних груп дієслів',
+    content:`<table><tr><th>Група</th><th>Інфінітив</th><th>Закінчення</th><th>Приклад</th></tr>
+<tr><td>I (-a)</td><td>a lucra</td><td><b>-at</b></td><td>lucr<b>at</b></td></tr>
+<tr><td>I (-a)</td><td>a mânca</td><td><b>-at</b></td><td>mânc<b>at</b></td></tr>
+<tr><td>II (-ea)</td><td>a vedea</td><td><b>-ut</b></td><td>văz<b>ut</b></td></tr>
+<tr><td>III (-e)</td><td>a face</td><td><b>-ut</b></td><td>făc<b>ut</b></td></tr>
+<tr><td>IV (-i)</td><td>a dormi</td><td><b>-it</b></td><td>dorm<b>it</b></td></tr>
+<tr><td>IV (-î)</td><td>a coborî</td><td><b>-ât</b></td><td>cobor<b>ât</b></td></tr></table>` },
+  { id:'g12', title:'A fi — бути (минулий час)', category:'Минулий час', note:'Відмінювання "бути" в минулому часі',
+    content:`<table><tr><th>Особа</th><th>Форма</th><th>Переклад</th></tr>
+<tr><td>Eu</td><td><b>am fost</b></td><td>я був/була</td></tr>
+<tr><td>Tu</td><td><b>ai fost</b></td><td>ти був/була</td></tr>
+<tr><td>El/Ea</td><td><b>a fost</b></td><td>він/вона був/була</td></tr>
+<tr><td>Noi</td><td><b>am fost</b></td><td>ми були</td></tr>
+<tr><td>Voi</td><td><b>ați fost</b></td><td>ви були</td></tr>
+<tr><td>Ei/Ele</td><td><b>au fost</b></td><td>вони були</td></tr></table>` },
+  { id:'g13', title:'A avea — мати (минулий час)', category:'Минулий час', note:'Відмінювання "мати" в минулому часі',
+    content:`<table><tr><th>Особа</th><th>Форма</th><th>Переклад</th></tr>
+<tr><td>Eu</td><td><b>am avut</b></td><td>я мав/мала</td></tr>
+<tr><td>Tu</td><td><b>ai avut</b></td><td>ти мав/мала</td></tr>
+<tr><td>El/Ea</td><td><b>a avut</b></td><td>він/вона мав/мала</td></tr>
+<tr><td>Noi</td><td><b>am avut</b></td><td>ми мали</td></tr>
+<tr><td>Voi</td><td><b>ați avut</b></td><td>ви мали</td></tr>
+<tr><td>Ei/Ele</td><td><b>au avut</b></td><td>вони мали</td></tr></table>` },
+  { id:'g14', title:'Приклади в минулому часі', category:'Минулий час', note:'Типові фрази з perfectul compus',
+    content:`<table><tr><th>Румунською</th><th>Переклад</th></tr>
+<tr><td>Am mâncat</td><td>Я поїв/поїла</td></tr>
+<tr><td>Ai dormit bine?</td><td>Ти добре спав/спала?</td></tr>
+<tr><td>A plecat acasă</td><td>Він/вона пішов/пішла додому</td></tr>
+<tr><td>Am lucrat ieri</td><td>Я працював/працювала вчора</td></tr>
+<tr><td>Nu am înțeles</td><td>Я не зрозумів/зрозуміла</td></tr>
+<tr><td>Ați fost în București?</td><td>Ви були в Бухаресті?</td></tr>
+<tr><td>Au cumpărat pâine</td><td>Вони купили хліб</td></tr></table>` },
   { id:'g09', title:'Правила вимови', note:'Як читати комбінації літер c, ch, g',
     content:`<div class="rule">c + e = че / че*</div>
 <p class="example">ce — що, cine — хто</p>
@@ -995,6 +1037,14 @@ async function autoImport() {
     const now = Date.now();
     for (let i = 0; i < GRAMMAR_SEEDS.length; i++) {
       await put('grammar', { ...GRAMMAR_SEEDS[i], created: now - (GRAMMAR_SEEDS.length - i) * 1000 });
+    }
+  } else {
+    const ids = new Set(existingGrammar.map(e => e.id));
+    const now = Date.now();
+    for (const seed of GRAMMAR_SEEDS) {
+      if (!ids.has(seed.id)) {
+        await put('grammar', { ...seed, created: now });
+      }
     }
   }
 }
