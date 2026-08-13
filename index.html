@@ -812,6 +812,24 @@ const SEED_DATA = [
 {"id":"v33","word":"a completa","translation":"доповнювати","type":"word","category":"Дієслова","example":""},
 {"id":"v34","word":"a corecta","translation":"виправляти","type":"word","category":"Дієслова","example":""},
 {"id":"v35","word":"a locui","translation":"жити","type":"word","category":"Дієслова","example":"Unde locuiești?"},
+{"id":"v36","word":"a înțelege","translation":"розуміти","type":"word","category":"Дієслова","example":""},
+{"id":"v37","word":"a ajunge","translation":"досягати / прибувати","type":"word","category":"Дієслова","example":""},
+{"id":"v38","word":"a conduce","translation":"керувати (вести транспорт)","type":"word","category":"Дієслова","example":""},
+{"id":"v39","word":"a închide","translation":"закривати / зачиняти","type":"word","category":"Дієслова","example":""},
+{"id":"v40","word":"a crede","translation":"вірити / вважати","type":"word","category":"Дієслова","example":""},
+{"id":"v41","word":"a scrie","translation":"писати","type":"word","category":"Дієслова","example":""},
+{"id":"v42","word":"a pune","translation":"класти / ставити","type":"word","category":"Дієслова","example":""},
+{"id":"v43","word":"a deschide","translation":"відкривати","type":"word","category":"Дієслова","example":""},
+{"id":"v44","word":"a aprinde","translation":"запалювати / вмикати","type":"word","category":"Дієслова","example":""},
+{"id":"v45","word":"a stinge","translation":"гасити / вимикати","type":"word","category":"Дієслова","example":""},
+{"id":"v46","word":"a sparge","translation":"розбивати","type":"word","category":"Дієслова","example":""},
+{"id":"v47","word":"a fierbe","translation":"варити / кипіти","type":"word","category":"Дієслова","example":""},
+{"id":"v48","word":"a ascunde","translation":"ховати","type":"word","category":"Дієслова","example":""},
+{"id":"v49","word":"a spune","translation":"казати / говорити","type":"word","category":"Дієслова","example":""},
+{"id":"v50","word":"a dispărea","translation":"зникати","type":"word","category":"Дієслова","example":""},
+{"id":"v51","word":"a vedea","translation":"бачити","type":"word","category":"Дієслова","example":""},
+{"id":"v52","word":"a face","translation":"робити","type":"word","category":"Дієслова","example":""},
+{"id":"v53","word":"a merge","translation":"іти / ходити","type":"word","category":"Дієслова","example":""},
 {"id":"iv01","word":"a bea","translation":"пити","type":"word","category":"Неправильні дієслова","example":""},
 {"id":"iv02","word":"a lua","translation":"брати, отримувати, купувати, сідати на транспорт","type":"word","category":"Неправильні дієслова","example":""},
 {"id":"iv03","word":"a da","translation":"давати","type":"word","category":"Неправильні дієслова","example":""},
@@ -1040,6 +1058,14 @@ async function autoImport() {
     const now = Date.now();
     for (let i = 0; i < SEED_DATA.length; i++) {
       await put('dictionary', { ...SEED_DATA[i], created: now - (SEED_DATA.length - i) * 1000, updated: now });
+    }
+  } else {
+    const ids = new Set(existingDict.map(e => e.id));
+    const now = Date.now();
+    for (const seed of SEED_DATA) {
+      if (!ids.has(seed.id)) {
+        await put('dictionary', { ...seed, created: now, updated: now });
+      }
     }
   }
   const existingGrammar = await getAll('grammar');
